@@ -1,333 +1,320 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paquimé Intelligence Hub - Observatorio 4.0</title>
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #d4a373;
-            --bg: #f4f7f6;
-            --success: #27ae60;
-            --warning: #f1c40f;
-            --danger: #e74c3c;
-            --info: #3498db;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
-        .header { background: var(--primary); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-            gap: 20px; 
-            align-items: start !important; 
-        }
-        
-        .card { 
-            background: white; 
-            padding: 22px; 
-            border-radius: 15px; 
-            box-shadow: 0 6px 12px rgba(0,0,0,0.08); 
-            border-top: 6px solid var(--accent); 
-            transition: transform 0.3s;
-            height: auto !important;
-        }
-        .card:hover { transform: translateY(-5px); }
-
-        #map { 
-            height: 160px !important; 
-            border-radius: 12px; 
-            margin: 15px 0; 
-            border: 1px solid #ddd; 
-            z-index: 1; 
-        }
-
-        /* Ajuste para que las gráficas no se desborden */
-        canvas { max-height: 150px !important; width: 100% !important; margin: 10px 0; }
-
-        .kpi { font-size: 2.3em; font-weight: bold; color: var(--primary); margin: 5px 0; }
-        .label { color: #7f8c8d; text-transform: uppercase; font-size: 0.8em; font-weight: 600; letter-spacing: 1px; }
-        .progress-container { background: #eee; height: 20px; border-radius: 12px; margin: 10px 0; overflow: hidden; }
-        .progress-bar { height: 100%; border-radius: 12px; transition: width 1.5s ease-in-out; background: var(--warning); width: 0; }
-        .ai-insight { background: #eef7ff; border-left: 4px solid var(--info); padding: 10px; margin-top: 10px; font-style: italic; font-size: 0.9em; border-radius: 0 8px 8px 0; }
-        .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.75em; font-weight: bold; margin-bottom: 10px; }
-        .badge-live { background: #ffebee; color: var(--danger); border: 1px solid var(--danger); }
-        .social-post { display: flex; gap: 10px; padding: 10px; background: #fafafa; border-radius: 8px; border: 1px solid #eee; font-size: 0.8em; margin-top: 10px; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reclama tu estrella</title>
+<style>
+  :root{
+    --bg:#070b1f; --bg2:#12183a; --card:#141a3d; --line:#2a3470;
+    --text:#eef1ff; --muted:#a9b2e6; --accent:#ffd54a; --accent2:#7c8cff; --ok:#5ee6a8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:radial-gradient(ellipse at 50% 0%,var(--bg2),var(--bg) 70%) fixed;
+    color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  #stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:.7;animation:tw 3s infinite ease-in-out}
+  @keyframes tw{0%,100%{opacity:.15}50%{opacity:1}}
+  #bar{position:fixed;top:0;left:0;height:4px;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent));z-index:5;transition:width .5s}
+  main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:36px 16px 48px}
+  .step{display:none;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px 20px;box-shadow:0 10px 40px rgba(0,0,0,.35);animation:in .4s ease}
+  .step.active{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .emoji{font-size:44px;display:block;text-align:center;margin-bottom:6px}
+  h1{font-size:1.5rem;margin:.2em 0 .4em;text-align:center}
+  h2{font-size:1.25rem;margin:.2em 0 .5em}
+  p{margin:.5em 0;color:var(--muted)}
+  .tag{display:block;text-align:center;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+  button{
+    width:100%;margin-top:16px;padding:14px 16px;border:0;border-radius:12px;font-size:1rem;font-weight:600;
+    background:var(--accent);color:#1b1500;cursor:pointer;
+  }
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.ghost{background:transparent;color:var(--text);border:1px solid var(--line);margin-top:10px}
+  input[type=text]{
+    width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);
+    background:#0d1230;color:var(--text);font-size:1rem;margin-top:8px
+  }
+  input[type=text]:focus{outline:2px solid var(--accent2);outline-offset:1px}
+  label.opt{
+    display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin-top:10px;
+    border:1px solid var(--line);border-radius:12px;background:#0d1230;cursor:pointer
+  }
+  label.opt input{margin-top:4px;accent-color:var(--accent)}
+  .msg{margin-top:12px;padding:10px 12px;border-radius:10px;background:#0d1230;border:1px dashed var(--line);color:var(--ok);display:none}
+  .terms{max-height:190px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:12px;background:#0d1230;font-size:.88rem;color:var(--muted)}
+  .terms li{margin-bottom:8px}
+  .progress{height:12px;border-radius:99px;background:#0d1230;border:1px solid var(--line);overflow:hidden;margin-top:18px}
+  .progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .4s}
+  #loadmsg{text-align:center;margin-top:14px;min-height:3em}
+  .reveal{text-align:center}
+  .place{
+    margin:14px 0;padding:16px;border-radius:14px;border:1px solid var(--accent);
+    background:linear-gradient(160deg,#1c2352,#141a3d)
+  }
+  .place b{display:block;font-size:1.35rem;color:var(--accent)}
+  .place span{display:block;color:var(--text)}
+  .photo-wrap{position:relative;width:230px;height:230px;margin:34px auto 30px;display:none}
+  .photo-wrap::before{
+    content:"";position:absolute;inset:-46px;border-radius:50%;
+    background:repeating-conic-gradient(rgba(255,213,74,.95) 0 5deg,transparent 5deg 20deg);
+    -webkit-mask-image:radial-gradient(circle,#000 42%,transparent 70%);
+    mask-image:radial-gradient(circle,#000 42%,transparent 70%);
+    animation:spin 24s linear infinite
+  }
+  .photo-wrap img{
+    position:relative;z-index:1;width:100%;height:100%;object-fit:cover;border-radius:50%;
+    border:3px solid var(--accent);box-shadow:0 0 34px rgba(255,213,74,.55)
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .sign{margin-top:16px;font-size:.9rem;color:var(--muted)}
+  .confetti{position:fixed;top:-30px;z-index:9;font-size:24px;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg);opacity:.8}}
+  @media (prefers-reduced-motion:reduce){.star,.confetti,.step,.photo-wrap::before{animation:none}}
+</style>
 </head>
 <body>
+<div id="bar"></div>
+<div id="stars" aria-hidden="true"></div>
 
-<div class="header">
-    <h1>Paquimé Intelligence Hub</h1>
-    <p>Observatorio de Turismo 4.0 - Punto 5 & 6</p>
-</div>
+<main>
 
-<div class="grid">
-    <div class="card" style="grid-column: 1 / -1;">
-        <span class="badge badge-live">● TELEMETRÍA IOT (EN VIVO)</span>
-        <div class="label">Distribución de Carga en Zona Arqueológica</div>
-        <div id="map"></div>
-        <div class="ai-insight">
-            <strong>Análisis del Observatorio:</strong> Concentración alta en "Casa de las Guacamayas". Redirigiendo flujos. [cite: 6, 20]
-        </div>
-    </div>
+  <!-- 0 · Intro -->
+  <section class="step active">
+    <span class="emoji">🌌</span>
+    <span class="tag">Reclamación nº 0001</span>
+    <h1>Certificado de estrella detectado</h1>
+    <p style="text-align:center">Tu certificado nos avisó que hay una estrella con tu nombre esperando. Antes de entregártela, necesitamos verificar que eres tú. Serán unos pasos. Tranquilo, casi ninguno duele.</p>
+    <button id="start">Iniciar reclamación</button>
+  </section>
 
-    <div class="card">
-        <div class="label">Predicción de Afluencia Semanal</div>
-        <canvas id="chartAfluencia"></canvas>
-        <div class="ai-insight">
-            <strong>IA Predictiva:</strong> Aumento del 40% esperado para el Sábado. [cite: 23, 27]
-        </div>
-    </div>
+  <!-- 1 · Nombre -->
+  <section class="step">
+    <span class="emoji">🪪</span>
+    <h2>¿Cómo te llamas?</h2>
+    <p>Nombre completo, apodo o lo que sea que usen tus amigos cuando te necesitan.</p>
+    <input type="text" id="name" autocomplete="off" placeholder="Escribe aquí" maxlength="60">
+    <button id="n1" disabled>Continuar</button>
+  </section>
 
-    <div class="card">
-    <div class="label">Índice de Satisfacción del Destino (NPS)</div>
-    <canvas id="chartSatisfaccion" style="max-height: 200px !important;"></canvas>
-    
-    <div class="social-post" style="background: #fff9db; border-color: #f1c40f;">
-        <div>
-            <strong>Feedback Reciente (IA Guía):</strong>
-            <p>"La IA resolvió mis dudas en mi idioma. ¡Mucho mejor que un folleto!"</p>
-            <small>Encuesta post-visita • 9.8/10</small>
-        </div>
-    </div>
+  <!-- 2 · Robot -->
+  <section class="step">
+    <span class="emoji">🤖</span>
+    <h2>Verificación anti-robots</h2>
+    <p>Los robots no tienen derecho a estrellas. Aún.</p>
+    <label class="opt"><input type="checkbox" id="robot"><span>No soy un robot. Soy un pug disfrazado de persona.</span></label>
+    <div class="msg" id="robotmsg">Verificado. Por favor, no te mires al espejo mientras ladras.</div>
+    <button id="n2" disabled>Continuar</button>
+  </section>
 
-    <div class="ai-insight">
-        <strong>Análisis de Sentimiento:</strong> El 88% de los usuarios califica la interacción con la IA como "Excelente". El punto de mejora detectado es la sombra en áreas de descanso.
-    </div>
-</div>
+  <!-- 3 · Pregunta de seguridad -->
+  <section class="step">
+    <span class="emoji">🔐</span>
+    <h2>Pregunta de seguridad</h2>
+    <p>¿Cuántos años tienes?</p>
+    <button class="ghost q">32</button>
+    <button class="ghost q">Los que tú digas</button>
+    <button class="ghost q">Prefiero no responder</button>
+    <div class="msg" id="qmsg">Respuesta correcta: ya tienes 32 como Edu, y ni modo.</div>
+    <button id="n3" style="display:none">Continuar</button>
+  </section>
 
-    <div class="card">
-    <span class="badge" style="background:var(--success); color:white;">● TENDENCIA DEL DÍA</span>
-    <div class="label">Pieza más Consultada (IA Vision)</div>
-    
-    <div style="margin-top: 15px; text-align: center;">
-        <img src="pieza-popular.png" alt="Efigie Zoomorfa Paquimé" style="width: 100%; height: 180px; object-fit: cover; border-radius: 10px; border: 2px solid var(--accent);">
-    </div>
+  <!-- 4 · Tipo de estrella -->
+  <section class="step">
+    <span class="emoji">⭐</span>
+    <h2>Elige el tipo de tu estrella</h2>
+    <p>Esto es muy importante para el papeleo.</p>
+    <label class="opt"><input type="radio" name="tipo" value="Enana blanca"><span>Enana blanca</span></label>
+    <label class="opt"><input type="radio" name="tipo" value="Gigante roja"><span>Gigante roja</span></label>
+    <label class="opt"><input type="radio" name="tipo" value="Agujero negro"><span>Agujero negro</span></label>
+    <label class="opt"><input type="radio" name="tipo" value="Supernova"><span>Supernova</span></label>
+    <div class="msg" id="tmsg">Dato importante: tu estrella pudo haber explotado hace millones de años. Su luz sigue llegando, como tus chistes.</div>
+    <button id="n4" disabled>Continuar</button>
+  </section>
 
-    <div style="margin-top: 10px;">
-        <div style="display: flex; justify-content: space-between; font-size: 0.85em; font-weight: bold;">
-            <span>Efigie Zoomorfa (Tejón)</span>
-            <span style="color: var(--info);">245 Consultas</span>
-        </div>
-        
-        <div style="margin-top: 8px;">
-            <div class="label" style="font-size: 0.65em;">Idiomas detectados:</div>
-            <div style="display: flex; gap: 5px; margin-top: 4px;">
-                <span style="background:#eee; padding: 2px 6px; border-radius: 4px; font-size: 0.7em;">ES (75%)</span>
-                <span style="background:#eee; padding: 2px 6px; border-radius: 4px; font-size: 0.7em;">EN (24%)</span>
-                <span style="background:#eee; padding: 2px 6px; border-radius: 4px; font-size: 0.7em;">IT (1%)</span>
-            </div>
-        </div>
+  <!-- 5 · Términos -->
+  <section class="step">
+    <span class="emoji">📜</span>
+    <h2>Términos y condiciones</h2>
+    <p>Léelos con atención, o no, como todos.</p>
+    <div class="terms">
+      <ol>
+        <li>La estrella es 100% no oficial, 100% de broma y 100% tuya.</li>
+        <li>La estrella pudo haber explotado hace millones de años. Su luz sigue llegando, como tus chistes.</li>
+        <li>Prometes cuidar de la estrella, no apagarla y no dejarla en visto.</li>
+        <li>Aceptas que ya tienes 32 como Edu, y ni modo.</li>
+        <li>No se aceptan devoluciones, reclamos ni cambios de estrella.</li>
+        <li>Si pierdes la estrella, será porque estabas jugando Fortnite.</li>
+        <li>Este contrato se autodestruirá al llegar a la última pantalla.</li>
+      </ol>
     </div>
+    <label class="opt"><input type="checkbox" id="terms"><span>Acepto todo sin leerlo</span></label>
+    <button id="n5" disabled>Reclamar estrella</button>
+  </section>
 
-    <div class="ai-insight">
-        <strong>Análisis Automático:</strong> Alta curiosidad detectada por el simbolismo del agua y técnicas de bruñido. Recomendación: Actualizar señalética física en este sector.
-    </div>
-</div>
+  <!-- 6 · Carga -->
+  <section class="step">
+    <span class="emoji">🛰️</span>
+    <h2 style="text-align:center">Buscando tu estrella…</h2>
+    <div class="progress"><i id="pfill"></i></div>
+    <p id="loadmsg"></p>
+  </section>
 
-    <div class="card">
-        <div class="label">Distribución de Sentimiento (RRSS)</div>
-        <canvas id="chartSentimiento"></canvas>
-        <div class="ai-insight">
-            <strong>Análisis:</strong> 92% de comentarios positivos en las últimas 24h. [cite: 13, 26]
-        </div>
+  <!-- 7 · Revelación -->
+  <section class="step reveal">
+    <span class="emoji">🎉</span>
+    <span class="tag">Misión cumplida</span>
+    <h1>¡Felicidades, <span class="nm"></span>!</h1>
+    <p>Tu estrella <b>LEX PRIME</b> fue localizada.<br><span id="tipo"></span></p>
+    <div class="photo-wrap" id="photo"><img id="foto" alt="Los dos, dentro de la estrella"></div>
+    <p style="color:var(--text)">Encontrarás tu estrella en:</p>
+    <div class="place">
+      <b id="lugar"></b>
+      <span id="dir"></span>
+      <span id="cuando"></span>
     </div>
+    <p>Misión: abordar la nave nodriza. Se recomienda llegar con hambre.</p>
+    <div class="sign">— <span id="firma"></span>, astrónomo aficionado y novio muy poco confiable</div>
+  </section>
 
-    <div class="card">
-    <div class="label">Demografía: Origen de Visitantes</div>
-    <canvas id="chartNacionalidad" style="max-height: 200px !important;"></canvas>
-    
-    <div class="ai-insight">
-        <strong>Inteligencia de Mercado:</strong> Incremento del 15% en visitantes de <strong>Francia</strong> este mes. 
-    </div>
-</div>
-    
-    <div class="card">
-        <div class="label">Contenido Generado por Usuario (UGC)</div>
-        <div style="margin-top: 15px; text-align: center;">
-            <span class="badge" style="background:var(--info); color:white; border:none; margin-bottom: 5px;">#PAQUIMÉ #LIFESTYLE #CULTURA (INSTAGRAM)</span>
-            <img src="atardecer-paquime.png" alt="Atardecer" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; border: 2px solid var(--accent);">
-        </div>
-        <div class="social-post">
-            <div>
-                <strong>Sentiment Analysis:</strong> <span style="color:var(--success)">Positivo (92%)</span>
-                <p>"La puesta de sol en las ruinas es mágica. #Paquime #Chihuahua"</p>
-            </div>
-        </div>
-        <div class="ai-insight">
-            <strong>IA Vision:</strong> Sin daños visibles en adobe. [cite: 9, 11]
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="label">Afluencia Actual (LiDAR)</div>
-        <div class="progress-container"><div id="bar-afluencia" class="progress-bar"></div></div>
-        <div id="txt-afluencia" style="text-align: right; font-weight: bold; font-size: 0.85em;">...</div>
-        <div class="ai-insight">
-            <strong>Estado:</strong> Flujo controlado por sistema inteligente. [cite: 17]
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="label">Monitoreo de RRSS (Sentiment Analysis)</div>
-        <div class="social-feed">
-            <div class="social-post">
-                <div style="background: #e1306c; width: 4px;"></div>
-                <div>
-                    <strong>@TuristaExplora</strong> <span class="sentiment-tag" style="background:var(--success)">Positivo</span>
-                    <p>"Increíble arquitectura en Paquimé, pero hace mucho calor ☀️"</p>
-                    <small>Hace 5 min • Instagram Check-in</small>
-                </div>
-            </div>
-            <div class="social-post">
-                <div style="background: #1877f2; width: 4px;"></div>
-                <div>
-                    <strong>Juan Pérez</strong> <span class="sentiment-tag" style="background:var(--warning)">Neutral</span>
-                    <p>"Falta señalización en el sendero norte."</p>
-                    <small>Hace 15 min • Facebook Post</small>
-                </div>
-            </div>
-        </div>
-        <div class="ai-insight">
-            <strong>IA Insight:</strong> Palabra clave "Calor" detectada 15 veces hoy. Alerta automática enviada para activar puntos de hidratación.
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="label">Índice de Preservación Digital</div>
-        <div class="kpi" style="color: var(--danger);">85% HR</div>
-        <div class="ai-insight">
-            <strong>Protocolo:</strong> Sensores detectan riesgo de erosión. Acceso restringido. [cite: 14, 19]
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="label">Impacto Económico Regional</div>
-        <div class="kpi">$100k</div>
-        <div class="label">Ventas Mata Ortiz (Semanal)</div>
-        <div class="ai-insight">
-            <strong>Dato:</strong> Correlación directa entre flujo y ventas locales. [cite: 21]
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="label">Tu Impacto (Vista Ciudadano)</div>
-        <div class="kpi">1.2m²</div>
-        <div class="ai-insight">
-            <strong>Transparencia:</strong> Tu visita financia la restauración del adobe. [cite: 28]
-        </div>
-    </div>
-</div>
+</main>
 
 <script>
-    // 1. Configuración del Mapa
-    var map = L.map('map', {zoomControl: false}).setView([30.3658, -107.9472], 17);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    L.circle([30.3660, -107.9475], {color: 'red', fillColor: '#f03', fillOpacity: 0.5, radius: 25}).addTo(map);
+/* ── EDITA AQUÍ LOS DATOS DE LA INVITACIÓN ── */
+const CONFIG = {
+  nombreFallback: "Lex",
+  lugar:     "XGalaxy Buffet",
+  direccion: "[PON AQUÍ LA DIRECCIÓN]",
+  fecha:     "Sábado 12 de diciembre",
+  hora:      "[PON AQUÍ LA HORA]",
+  firma:     "Edu"
+};
+/* ───────────────────────────────────────── */
 
-    // 2. Gráfica de Afluencia (Líneas)
-    new Chart(document.getElementById('chartAfluencia'), {
-        type: 'line',
-        data: {
-            labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
-            datasets: [{
-                label: 'Visitantes',
-                data: [120, 150, 110, 180, 250, 480, 390],
-                borderColor: '#d4a373',
-                tension: 0.4,
-                fill: true,
-                backgroundColor: 'rgba(212, 163, 115, 0.1)'
-            }]
-        },
-        options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
-    });
+const $ = s => document.querySelector(s);
+const steps = [...document.querySelectorAll('.step')];
+let nombre = CONFIG.nombreFallback;
+let tipo = "";
 
-    // 3. Gráfica de Nacionalidades (Barras Horizontales)
-new Chart(document.getElementById('chartNacionalidad'), {
-    type: 'bar',
-    data: {
-        labels: ['México', 'EE.UU.', 'Canadá', 'Francia', 'Otros'],
-        datasets: [{
-            label: '% de Visitantes',
-            data: [55, 25, 10, 7, 3],
-            backgroundColor: [
-                '#27ae60', // México (Verde)
-                '#3498db', // EE.UU. (Azul)
-                '#e67e22', // Canadá (Naranja)
-                '#9b59b6', // Francia (Morado)
-                '#95a5a6'  // Otros (Gris)
-            ],
-            borderRadius: 5
-        }]
-    },
-    options: {
-        indexAxis: 'y', // Esto la hace horizontal
-        plugins: { legend: { display: false } },
-        scales: {
-            x: { beginAtZero: true, max: 100, grid: { display: false } },
-            y: { grid: { display: false } }
-        }
-    }
+/* fondo de estrellas */
+(function(){
+  const box = $('#stars');
+  for(let i=0;i<90;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    s.style.animationDuration = (2+Math.random()*3)+'s';
+    const size = Math.random()<.15 ? 3 : 2;
+    s.style.width = s.style.height = size+'px';
+    box.appendChild(s);
+  }
+})();
+
+function go(i){
+  steps.forEach((s,j)=>s.classList.toggle('active', j===i));
+  $('#bar').style.width = (i/(steps.length-1)*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(i===6) runLoading();
+  if(i===7) reveal();
+}
+
+/* 0 */
+$('#start').onclick = () => go(1);
+
+/* 1 */
+$('#name').addEventListener('input', e => {
+  $('#n1').disabled = e.target.value.trim().length === 0;
 });
-
-    // 4. Gráfica de Sentimiento (Dona)
-    new Chart(document.getElementById('chartSentimiento'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Positivo', 'Neutral', 'Negativo'],
-            datasets: [{
-                data: [92, 5, 3],
-                backgroundColor: ['#27ae60', '#f1c40f', '#e74c3c']
-            }]
-        },
-        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
-    });
-
-    // 5. Gráfica de Satisfacción (Radar)
-new Chart(document.getElementById('chartSatisfaccion'), {
-    type: 'radar',
-    data: {
-        labels: ['Culturización', 'Accesibilidad', 'Tecnología', 'Conservación', 'Atención'],
-        datasets: [{
-            label: 'Calificación de Visitantes',
-            data: [95, 88, 98, 92, 90],
-            fill: true,
-            backgroundColor: 'rgba(52, 152, 219, 0.2)',
-            borderColor: '#3498db',
-            pointBackgroundColor: '#3498db',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: '#3498db'
-        }]
-    },
-    options: {
-        plugins: { legend: { display: false } },
-        scales: {
-            r: {
-                angleLines: { display: false },
-                suggestedMin: 50,
-                suggestedMax: 100
-            }
-        }
-    }
+$('#name').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && !$('#n1').disabled) $('#n1').click();
 });
+$('#n1').onclick = () => {
+  nombre = $('#name').value.trim() || CONFIG.nombreFallback;
+  go(2);
+};
 
-    // 6. Animación de Afluencia
-    window.onload = function() {
-        const p = 68;
-        const bar = document.getElementById('bar-afluencia');
-        setTimeout(() => { 
-            bar.style.width = p + '%'; 
-            document.getElementById('txt-afluencia').innerText = p + '% capacidad';
-        }, 600);
-    };
+/* 2 */
+$('#robot').onchange = e => {
+  $('#n2').disabled = !e.target.checked;
+  $('#robotmsg').style.display = e.target.checked ? 'block' : 'none';
+};
+$('#n2').onclick = () => go(3);
+
+/* 3 */
+document.querySelectorAll('.q').forEach(b => b.onclick = () => {
+  $('#qmsg').style.display = 'block';
+  $('#n3').style.display = 'block';
+  document.querySelectorAll('.q').forEach(x => x.disabled = true);
+});
+$('#n3').onclick = () => go(4);
+
+/* 4 */
+document.querySelectorAll('input[name=tipo]').forEach(r => r.onchange = () => {
+  tipo = r.value;
+  $('#tmsg').style.display = 'block';
+  $('#n4').disabled = false;
+});
+$('#n4').onclick = () => go(5);
+
+/* 5 */
+$('#terms').onchange = e => { $('#n5').disabled = !e.target.checked; };
+$('#n5').onclick = () => go(6);
+
+/* 6 */
+function runLoading(){
+  const msgs = [
+    "Contactando a la Agencia Espacial Totalmente Real y Legal…",
+    "Buscando tu estrella entre 200 mil millones de opciones…",
+    "Ajustando por tus 32 años, y ni modo…",
+    "Verificando que sigues siendo mi novio…",
+    "Puliendo la estrella para que brille un poco más…"
+  ];
+  let p = 0, k = 0;
+  $('#pfill').style.width = '0%';
+  $('#loadmsg').textContent = msgs[0];
+  const t = setInterval(() => {
+    p += 20; k++;
+    $('#pfill').style.width = p + '%';
+    if(k < msgs.length) $('#loadmsg').textContent = msgs[k];
+    if(p >= 100){ clearInterval(t); setTimeout(() => go(7), 700); }
+  }, 1300);
+}
+
+/* 7 */
+function reveal(){
+  document.querySelectorAll('.nm').forEach(n => n.textContent = nombre);
+  $('#tipo').textContent = tipo ? 'Tipo: ' + tipo + '.' : '';
+  $('#lugar').textContent = CONFIG.lugar;
+  $('#dir').textContent = CONFIG.direccion;
+  $('#cuando').textContent = CONFIG.fecha + ' · ' + CONFIG.hora;
+  $('#firma').textContent = CONFIG.firma;
+  /* foto opcional: guarda una imagen llamada foto.jpg junto a este archivo */
+  const im = $('#foto');
+  im.onload = () => { $('#photo').style.display = 'block'; };
+  im.src = 'foto.jpg';
+  confetti();
+}
+function confetti(){
+  const icons = ['✨','⭐','🌟','🪐','🎉','🍣'];
+  for(let i=0;i<50;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.textContent = icons[Math.floor(Math.random()*icons.length)];
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.animationDuration = (3+Math.random()*3) + 's';
+    c.style.animationDelay = (Math.random()*1.5) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 7500);
+  }
+}
 </script>
 </body>
 </html>
