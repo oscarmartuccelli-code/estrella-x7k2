@@ -90,7 +90,7 @@
     <span class="emoji">🌌</span>
     <span class="tag">Reclamación nº 1312</span>
     <h1>Certificado de estrella detectado</h1>
-    <p style="text-align:center">Tu certificado nos avisó que hay una estrella con tu nombre esperando. Antes de entregártela, necesitamos verificar que eres tú. Serán unos pasos. Tranquilo, casi ninguno duele.</p>
+    <p style="text-align:center">De acuerdo a tu certificado, hay una estrella con tu nombre esperando. Antes de entregártela, necesitamos verificar que eres tú. Serán solo unos pasos.</p>
     <button id="start">Iniciar reclamación</button>
   </section>
 
@@ -98,7 +98,7 @@
   <section class="step">
     <span class="emoji">🪪</span>
     <h2>¿Cómo te llamas?</h2>
-    <p>Nombre completo, apodo o lo que sea que usen tus amigos cuando te necesitan.</p>
+    <p>Nombre completo, sin abreviaciones.</p>
     <input type="text" id="name" autocomplete="off" placeholder="Escribe aquí" maxlength="60">
     <button id="n1" disabled>Continuar</button>
   </section>
@@ -107,9 +107,9 @@
   <section class="step">
     <span class="emoji">🤖</span>
     <h2>Verificación anti-robots</h2>
-    <p>Los robots no tienen derecho a estrellas. Aún.</p>
-    <label class="opt"><input type="checkbox" id="robot"><span>No soy un robot. Soy un pug disfrazado de persona.</span></label>
-    <div class="msg" id="robotmsg">Verificado. Por favor, no te mires al espejo mientras ladras.</div>
+    <p>Demuestra que no eres un robot.</p>
+    <label class="opt"><input type="checkbox" id="robot"><span>No soy un robot.</span></label>
+    <div class="msg" id="robotmsg">Verificado.</div>
     <button id="n2" disabled>Continuar</button>
   </section>
 
@@ -117,10 +117,10 @@
   <section class="step">
     <span class="emoji">🔐</span>
     <h2>Pregunta de seguridad</h2>
-    <p>¿Cuántos años tienes?</p>
-    <button class="ghost q">32</button>
-    <button class="ghost q">Los que tú digas</button>
-    <button class="ghost q">Prefiero no responder</button>
+    <p>¿Quién es tu novio él más guapo?</p>
+    <button class="ghost q">Edu</button>
+    <button class="ghost q">Edu</button>
+    <button class="ghost q">Edu</button>
     <div class="msg" id="qmsg">Respuesta correcta: ya tienes 32 como Edu, y ni modo.</div>
     <button id="n3" style="display:none">Continuar</button>
   </section>
@@ -134,7 +134,7 @@
     <label class="opt"><input type="radio" name="tipo" value="Gigante roja"><span>Gigante roja</span></label>
     <label class="opt"><input type="radio" name="tipo" value="Agujero negro"><span>Agujero negro</span></label>
     <label class="opt"><input type="radio" name="tipo" value="Supernova"><span>Supernova</span></label>
-    <div class="msg" id="tmsg">Dato importante: tu estrella pudo haber explotado hace millones de años. Su luz sigue llegando, como tus chistes.</div>
+    <div class="msg" id="tmsg">Dato importante: tu estrella pudo haber explotado hace millones de años. Su luz sigue llegando, como la tuya.</div>
     <button id="n4" disabled>Continuar</button>
   </section>
 
@@ -146,11 +146,11 @@
     <div class="terms">
       <ol>
         <li>La estrella es 100% no oficial, 100% de broma y 100% tuya.</li>
-        <li>La estrella pudo haber explotado hace millones de años. Su luz sigue llegando, como tus chistes.</li>
+        <li>La estrella pudo haber explotado hace millones de años. Su luz sigue iluminando, como tú iluminas mi vida.</li>
         <li>Prometes cuidar de la estrella, no apagarla y no dejarla en visto.</li>
-        <li>Aceptas que ya tienes 32 como Edu, y ni modo.</li>
+        <li>Aceptas que ya tendrás 32 como yo, y ni modo.</li>
         <li>No se aceptan devoluciones, reclamos ni cambios de estrella.</li>
-        <li>Si pierdes la estrella, será porque estabas jugando Fortnite.</li>
+        <li>Si pierdes la estrella, será porque nunca me amaste.</li>
         <li>Este contrato se autodestruirá al llegar a la última pantalla.</li>
       </ol>
     </div>
@@ -179,8 +179,8 @@
       <span id="dir"></span>
       <span id="cuando"></span>
     </div>
-    <p>Misión: abordar la nave nodriza. Se recomienda llegar con hambre.</p>
-    <div class="sign">— <span id="firma"></span>, astrónomo aficionado y novio muy poco confiable</div>
+    <p>Misión: abordar el uber nodriza. Se recomienda llegar con hambre.</p>
+    <div class="sign">— <span id="firma"></span>, astrónomo aficionado y tu novio favorito</div>
   </section>
 
 </main>
@@ -190,9 +190,9 @@
 const CONFIG = {
   nombreFallback: "Lex",
   lugar:     "XGalaxy Buffet",
-  direccion: "[PON AQUÍ LA DIRECCIÓN]",
+  direccion: "Av. Ejército Nacional 7445-L-2, Partido Iglesias, 32598 Juárez, Chih.",
   fecha:     "Sábado 12 de diciembre",
-  hora:      "[PON AQUÍ LA HORA]",
+  hora:      "Rai Nau",
   firma:     "Edu"
 };
 /* ───────────────────────────────────────── */
